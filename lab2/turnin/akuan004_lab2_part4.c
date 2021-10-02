@@ -40,7 +40,7 @@ int main(void) {
 			if (tempC - tempA > 0x50)
 				tempD = tempD | 0x02;
 		//combine the two output
-		totalWeight = totalWeight & 0xFC;
+		totalWeight = totalWeight >> 2;		//Keep the most sigificant bits
 		tempD = tempD | totalWeight;		
 		PORTD = tempD;
 	}
