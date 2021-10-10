@@ -63,6 +63,7 @@ void Tick(){
             else 
                 state = Idle;
             break;
+
         default:
             state = Start;
             break; 
