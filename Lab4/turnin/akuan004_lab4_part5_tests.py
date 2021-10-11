@@ -27,10 +27,11 @@ tests = [ {'description': 'This test will run second.',
         'expected': [('PORTB', 0x01)],
     },
     {'description': 'This test will run second.',
-    'steps': [ {'inputs': [('PINA', 0x01), ('PINB', 0x01)], 'time': 300, 'expected': [('PORTB', 0x01)]}, # Set PIN to val then run 300 ms
-        {'inputs': [('PINA', 0x01),('PINB', 0x02)], 'iterations': 1, 'expected': [('PORTB', 0x01)]}, 
-        {'inputs': [('PINA', 0x00), ('PINA', 0x01)], 'time': 600},], 
+    'steps': [ {'inputs': [('PINA', 0x00), ('PINB', 0x01)], 'time': 300, 'expected': [('PORTB', 0x01)]}, # Set PIN to val then run 300 ms
+        {'inputs': [('PINA', 0x04),('PINB', 0x01),'PINB', 0x02),'PINB', 0x01)], 'iterations': 1, 'expected': [('PORTB', 0x01)]}, 
+        {'inputs': [('PINA', 0x00), ('PINA', 0x02)], 'time': 600},], 
         'expected': [('PORTB', 0x01)],
+    },
     ]
 
 # Optionally you can add a set of "watch" variables these need to be global or static and may need
