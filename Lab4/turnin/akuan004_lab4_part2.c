@@ -30,9 +30,9 @@ void Tick(){
                 state = OnBothPressed;
             break;
         case OnPressAdd:
-            if ((PINA & 0x03) == 0x03)
-                state = OnBothPressed;
-            else 
+            // if ((PINA & 0x03) == 0x03)
+            //     state = OnBothPressed;
+            // else 
                 state = HoldAdd;
             break;
         case HoldAdd:
@@ -58,12 +58,14 @@ void Tick(){
                 state = Idle;
             break;
         case OnBothPressed:
-            if ((PINA & 0x03) == 0x03)
-                state = OnBothPressed;
-            else 
-                state = Idle;
+            // if ((PINA & 0x01) == 1)
+            //     state = OnPressAdd;
+            // else if ((PINA & 0x02) == 0x02)
+            //     state = OnPressMinus;
+            // else if ((PINA & 0x03) == 0x03)
+            //     state = OnBothPressed;
+            state = Idle;
             break;
-
         default:
             state = Start;
             break; 
@@ -83,7 +85,7 @@ void Tick(){
         case HoldAdd:
             break;     
         case OnPressMinus:
-            if( PORTC > 0x00)
+            if(PORTC > 0x00)
                 PORTC -= 1;
             break;        
         case HoldMinus:
