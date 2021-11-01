@@ -13,7 +13,7 @@
 #endif
 
 unsigned short voltage = 0x00;
-unsigned short max = 0x10;
+unsigned short max = 200;
 
 void ADC_init() {
 	ADCSRA |= (1 << ADEN) | (1 << ADSC) | (1<< ADATE);
@@ -45,3 +45,4 @@ int main(void) {
     }
     return 1;
 }
+
