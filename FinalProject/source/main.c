@@ -39,22 +39,18 @@ signed char obstacle_distance = 80;
 
 //joy stick input
 unsigned short input;
-enum gameState{ gameStart, gameInit};
+enum gameState{ gameStart, gameInit, gameEnd};
 int gameSMTick(int state)
 {
   switch (state)
   {
   case gameStart:
-    type = (rand()%2);
+    type = 0;
     state = gameInit;
     break;
 
   case gameInit:
     input = ADC;
-    // if(input > 200 && input < 400 && height < 22 )
-    //   state = DinoJump;
-    // else 
-    //   crouch = 0;
 
     if (input > 0 && input < 200 &&  height > 0)
       crouch = 1;
@@ -63,6 +59,14 @@ int gameSMTick(int state)
     
     if (input > 800 &&  height > 0 && down != 1)
       up = 1;
+    break;
+
+  case gameEnd:
+    input = ADC;
+    if (input > 800)
+      state = gameInit;
+    else 
+      state = gameEnd;
     break;
 
   default:
@@ -145,8 +149,32 @@ int gameSMTick(int state)
 
     if (up || down )
       drawDino(height);
-
+    
+    //check for hitbox 
+    if (type == 1 && obstacle_distance < 22 && !crouch){
+      nokia_lcd_clear();
+      state = gameEnd;
+    }
+    if (type != 1 && obstacle_distance < 22 && height > 7){
+      nokia_lcd_clear();
+      state = gameEnd;
+    }
     nokia_lcd_render();
+    break;
+
+  case gameEnd:
+    //reset game state 
+    height = 22; 
+    crouch = 0;
+    up = 0;
+    left  = 1;
+    obstacle_distance = 80;
+    type = 0;
+    nokia_lcd_set_cursor(0, 0);
+    nokia_lcd_write_string("GameOver", 2);
+    nokia_lcd_set_cursor(0, 30);
+    nokia_lcd_write_string("move to start", 1);
+    nokia_lcd_render() ;
     break;
 
   default:
