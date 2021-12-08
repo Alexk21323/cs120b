@@ -15,6 +15,7 @@
 #include "nokia5110.h"
 #include "scheduler.h"
 #include "timer.h"
+#include "SR.h"
 #include <avr/interrupt.h>
 #include <time.h>
 #include <stdio.h>  // to use rand 
@@ -39,6 +40,22 @@ signed char obstacle_distance = 80;
 
 //joy stick input
 unsigned short input;
+
+//button 
+unsigned char button;
+
+unsigned char red = 0x01;
+unsigned char black = 0x1F;
+
+void addScore(){
+  if(black == 0x00){
+    red = (red << 1);
+    black = 0x0F;
+  }
+  else 
+    black = black >> 1;   
+}
+
 enum gameState{ gameStart, gameInit, gameEnd};
 int gameSMTick(int state)
 {
@@ -51,6 +68,7 @@ int gameSMTick(int state)
 
   case gameInit:
     input = ADC;
+    button = ~PINA & 0x04;
 
     if (input > 0 && input < 200 &&  height > 0)
       crouch = 1;
@@ -59,12 +77,16 @@ int gameSMTick(int state)
     
     if (input > 800 &&  height > 0 && down != 1)
       up = 1;
+    
+    if(button)
+      state = gameEnd;
+
     break;
 
   case gameEnd:
     input = ADC;
-    if (input > 800)
-      state = gameInit;
+    if (input >0 && input <200)
+      state = gameStart;
     else 
       state = gameEnd;
     break;
@@ -77,6 +99,8 @@ int gameSMTick(int state)
   switch (state)
   {
   case gameStart:
+    red = 0x01;
+    black = 0x1F;
     break;
 
   case gameInit:
@@ -88,7 +112,7 @@ int gameSMTick(int state)
       height -= 2;
     }
 
-    // hover for 7 frame 
+    // hover for 5 frame 
     if (height == 0)
     {
       count -= 1; 
@@ -112,6 +136,7 @@ int gameSMTick(int state)
       obstacle_distance -= 5;
     else if (obstacle_distance == 0)
     {
+      addScore();
       type = rand()%2;
       if (type == 1)
         obstacle_distance = 65;
@@ -163,17 +188,23 @@ int gameSMTick(int state)
     break;
 
   case gameEnd:
+    nokia_lcd_clear();
     //reset game state 
     height = 22; 
     crouch = 0;
     up = 0;
+    down = 0;
     left  = 1;
+    count = 5;
     obstacle_distance = 80;
     type = 0;
-    nokia_lcd_set_cursor(0, 0);
-    nokia_lcd_write_string("GameOver", 2);
-    nokia_lcd_set_cursor(0, 30);
-    nokia_lcd_write_string("move to start", 1);
+    //render 
+    nokia_lcd_set_cursor(20, 0);
+    nokia_lcd_write_string("Game", 2);
+    nokia_lcd_set_cursor(20, 20);
+    nokia_lcd_write_string("Over", 2);
+    nokia_lcd_set_cursor(0, 40);
+    nokia_lcd_write_string("down to start", 1);
     nokia_lcd_render() ;
     break;
 
@@ -184,33 +215,32 @@ int gameSMTick(int state)
 }
 
 //Render Using Queue
-enum obstacleState{ obstacleStart, obstacleInit };
-int obstacleSMTick(int state)
+enum scoreState{ scoreStart, scoreInit};
+int scoreSMTick(int state)
 {
   switch (state)
   {
-  case obstacleStart:
-    state = obstacleInit;
+  case scoreStart:
+    state = scoreInit;
     break;
 
-  case obstacleInit:
+  case scoreInit:
     break;
 
   default:
-    state = obstacleStart;
+    state = scoreStart;
     break;
   }
   switch (state)
   {
-  case obstacleStart:
+  case scoreStart:
     break;
 
-  case obstacleInit:
-    for (int i = 74; i > 0; i -=2)
-    {
-      nokia_lcd_clear();
-      drawCactus(i);
-    }
+  case scoreInit:
+    REDWrite(red);
+    BLACKWrite(black);
+    break;
+  
     default:
       break;
   }
@@ -222,13 +252,19 @@ void A2D_init() {
 
 int main(void)
 {
+  DDRA = 0x00; PORTA = 0xFF;          //Initialize Port A to be inputs
+  DDRC = 0xFF; PORTC = 0x00;
+  DDRD = 0xFF; PORTD = 0x00;
+
   srand(time(0));
   nokia_lcd_init();
   nokia_lcd_clear();
 
   A2D_init();
-  static task task1;
-  task *tasks[] = {&task1};
+  REDInit();
+  BLACKInit();
+  static task task1, task2;
+  task *tasks[] = {&task1, &task2};
   const unsigned short numTasks = sizeof(tasks) / sizeof(task *);
   const char start = -1;
 
@@ -237,6 +273,10 @@ int main(void)
   task1.elapsedTime = task1.period;
   task1.TickFct = &gameSMTick;
   
+  task2.state = start;
+  task2.period = 10;
+  task2.elapsedTime = task1.period;
+  task2.TickFct = &scoreSMTick;
   TimerSet(10);
   TimerOn();
 
@@ -255,4 +295,5 @@ int main(void)
     while (!TimerFlag);
     TimerFlag = 0;
   }
+  
 }

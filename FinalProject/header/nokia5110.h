@@ -1,31 +1,12 @@
-/* Nokia 5110 LCD AVR Library
- *
- * Copyright (C) 2015 Sergey Denisov.
- * Written by Sergey Denisov aka LittleBuster (DenisovS21@gmail.com)
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public Licence
- * as published by the Free Software Foundation; either version 3
- * of the Licence, or (at your option) any later version.
- *
- * Original library written by SkewPL, http://skew.tk
- */
-
 #ifndef __NOKIA_5110_H__
 #define __NOKIA_5110_H__
 
 #include <avr/pgmspace.h>
 #include <stdint.h>
 
-/*
- * LCD's port
- */
 #define PORT_LCD PORTB
 #define DDR_LCD DDRB
 
-/*
- * LCD's pins
- */
 #define LCD_SCE PB1
 #define LCD_RST PB2
 #define LCD_DC PB3
@@ -33,7 +14,6 @@
 #define LCD_CLK PB5
 
 #define LCD_CONTRAST 0x40
-
 
 void nokia_lcd_init(void);
 
